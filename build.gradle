@@ -1,0 +1,108 @@
+plugins {
+	id 'java'
+    id 'org.springframework.boot' version '4.0.2'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+
+    }
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+
+    // Voeg deze toe om de Jackson-fout op te lossen
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.core:jackson-core'
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // not need included in org.springframework.boot:spring-boot-starter-data-redis
+    //implementation("io.lettuce:lettuce-core:6.8.1.RELEASE")
+
+    // database access
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // H2 database
+    runtimeOnly 'com.h2database:h2'
+    testImplementation 'com.h2database:h2'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	compileOnly 'org.springframework.boot:spring-boot-devtools'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+//region kill port task
+tasks.named('bootRun').configure {
+    dependsOn killPort
+}
+
+/**
+ * This execution task can you find in the gradle map 'cleanup'
+ * where you can find the task 'killPort'
+ */
+tasks.register('killPort', Exec) {
+    description = "Finds and forcefully kills any process running on port $appPort."
+    group = "cleanup"
+
+    // Use the defined port number
+    def port = project.ext.appPort
+
+    // Configure the command based on the operating system
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+        // Windows command to find PID and kill it
+        // Note: Taskkill /F /PID uses a process variable %a extracted from netstat output
+        commandLine 'cmd', '/c', "for /f \"tokens=5\" %a in ('netstat -ano ^| findstr :${port}') do taskkill /f /pid %a"
+
+        // Ensure standard output/error is shown
+        standardOutput = new ByteArrayOutputStream()
+        errorOutput = standardOutput
+        ignoreExitValue = true // Prevents Gradle from failing if no process is found
+    } else {
+        // Linux/macOS command using lsof and kill
+        // lsof -t -i:port finds the PID, which is passed to kill -9
+        commandLine 'bash', '-c', "lsof -t -i:$port | xargs kill -9"
+
+        // Standard output/error configuration (optional, but good for debugging)
+        standardOutput = new ByteArrayOutputStream()
+        errorOutput = standardOutput
+        ignoreExitValue = true // Prevents Gradle from failing if no process is found
+    }
+
+    // Optional: Log the command's output
+    doLast {
+        if (!standardOutput.toString().trim().isEmpty()) {
+            println "Kill Port Output:\n${standardOutput.toString().trim()}"
+        } else {
+            println "No process found running on port ${port}."
+        }
+    }
+}
+//endregion

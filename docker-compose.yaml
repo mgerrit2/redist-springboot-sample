@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  docker-spring-boot:
+    # building the containers docker in local path
+    image: docker-spring-boot:latest
+    build: .
+    ports:
+      - "0.0.0.0:8080:8080"
+
