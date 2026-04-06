@@ -2,38 +2,27 @@ package com.example.demo.redis.localhost.mapper;
 
 import com.example.demo.redis.localhost.dtos.ProductDto;
 import com.example.demo.redis.localhost.entity.ProductEntity;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 import org.springframework.stereotype.Component;
 
-@Component
-public class ProductMapper {
+import java.util.List;
 
-    // Private constructor to prevent instantiation
-    private ProductMapper() {}
+@Mapper(
+        componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.ERROR // Goede praktijk: geeft fout bij vergeten velden
+)
+public interface ProductMapper {
 
-    public  ProductDto toDto(ProductEntity product) {
+    // MapStruct genereert de implementatie hiervan automatisch
+    @Mapping(target = "version", ignore = true)
+    ProductDto toDto(ProductEntity product);
 
-        if (product == null) {
-            return null;
-        }
+    List<ProductDto> toDtoList(List<ProductEntity> products);
 
-        ProductDto dto = new ProductDto();
-        dto.setId(product.getId());
-        dto.setName(product.getName());
-        dto.setPrice(product.getPrice());
-        return dto;
-    }
-
-    public ProductEntity toEntity(ProductDto dto) {
-
-        if (dto == null) {
-            return null;
-        }
-
-        ProductEntity product = new ProductEntity();
-        product.setId(dto.getId());
-        product.setName(dto.getName());
-        product.setPrice(dto.getPrice());
-        return product;
-    }
+    // MapStruct genereert ook dit automatisch, geen handmatige code nodig!
+    @Mapping(target = "version", source = "version")
+    ProductEntity toEntity(ProductDto dto);
 
 }

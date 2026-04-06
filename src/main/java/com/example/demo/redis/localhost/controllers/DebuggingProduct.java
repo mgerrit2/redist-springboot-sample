@@ -18,7 +18,7 @@ public class DebuggingProduct {
     @ResponseStatus(value = HttpStatus.OK)
     public ResponseEntity<ProductDto> getProduct(){
         return ResponseEntity.ok(ProductDto.builder()
-                .id(1)
+                .id(1L)
                 .name("name")
                 .price(new BigDecimal(100))
                 .build());

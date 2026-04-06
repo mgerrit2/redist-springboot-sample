@@ -1,10 +1,10 @@
 version: "3"
 
 services:
-  docker-spring-boot:
-    # building the containers docker in local path
-    image: docker-spring-boot:latest
+  redist-springboot-sample:
     build: .
+    container_name: redist-springboot-sample
     ports:
-      - "0.0.0.0:8080:8080"
+        - "0.0.0.0:8083:8081"
+
 

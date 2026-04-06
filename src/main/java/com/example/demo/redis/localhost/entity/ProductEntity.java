@@ -17,4 +17,7 @@ public class ProductEntity {
     private String name;
     private BigDecimal price;
 
+    @Version
+    private Integer version;
+
 }

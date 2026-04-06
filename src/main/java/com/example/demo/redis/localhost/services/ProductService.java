@@ -11,6 +11,8 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @AllArgsConstructor
 @Service
 public class ProductService {
@@ -37,12 +39,12 @@ public class ProductService {
 
     @CachePut(value = "PRODUCT_CACHE", key="#result.id()")
     public ProductDto updateProduct(@Valid ProductDto productDto) {
-        long productId = productDto.getId();
+        long productId = productDto.id();
         var productEntity = productRs.findById(productId).orElseThrow(()
                 -> new IllegalArgumentException("Cannot find product with id " + productId));
 
-        productEntity.setName(productDto.getName());
-        productEntity.setPrice(productDto.getPrice());
+        productEntity.setName(productDto.name());
+        productEntity.setPrice(productDto.price());
 
         var updateProduct = productRs.save(productEntity);
 
@@ -60,4 +62,7 @@ public class ProductService {
     }
 
 
+    public List<ProductDto> getAllProducts() {
+        return productMap.toDtoList(productRs.findAll());
+    }
 }
