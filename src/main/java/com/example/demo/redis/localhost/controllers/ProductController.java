@@ -6,9 +6,12 @@ import com.example.demo.redis.localhost.services.ProductService;
 import lombok.AllArgsConstructor;
 import jakarta.validation.Valid;
 
+import lombok.extern.log4j.Log4j2;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+@Log4j2
 @AllArgsConstructor
 @RestController
 @RequestMapping("api/product")
@@ -16,6 +19,8 @@ public class ProductController {
 
     private final ProductService productSv;
 
+
+    @CachePut(value = "productCache", key = "#productDto.id")
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
     public ProductDto createProduct(
